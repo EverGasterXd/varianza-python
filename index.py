@@ -2,26 +2,15 @@ import math
 from tabulate import tabulate
 import agrupados
 import noAgrupados
-
-print("""
-escoge cual quieres usar
- 1.- no agrupados
- 2.- agrupados
- """)
-opciones = int(input())
-if opciones == 1:
     
-    datos = input("Ingresa números separados por espacios:\n")
-    numeros = [int(d) for d in datos.split() if d.isdigit()]
+datos = input("Ingresa números separados por espacios:\n")
+numeros = [int(d) for d in datos.split() if d.isdigit()]
     
-    if len(numeros) >=30:
-            print("pasaste la cantidad numeros posibles")
-            exit()
-    """
-    hace la tabla de manera de no agrupados, cuando no es mas de 29 datos
-    """
+"""
+hace la tabla de manera de no agrupados, cuando no es mas de 29 datos
+"""
 
-    if len(numeros) <= 29:
+if len(numeros) <= 29:
         tabla, rango = noAgrupados.tabla(numeros)
         headers = ["Dato", "frecuencia", "frecuencia relativa", "frecuencia acumulada", "frecuencia relativa acumulada"]
         no_agrupados = []
@@ -37,17 +26,7 @@ if opciones == 1:
         mediana: {noAgrupados.mediana(numeros)}
         moda: {noAgrupados.moda(numeros)}
         desviacion estandar: {noAgrupados.d_e(numeros)}""")
-        
-if opciones == 2:
-    datos = input("Ingresa números separados por espacios:\n")
-
-    numeros = [int(d) for d in datos.split() if d.isdigit()]
-
-    # if len(numeros) > 31:
-    #     print("Pasaste la cantidad máxima de números posibles")
-    #     exit()
-
-
+else:
     tabla, xi, intervalo, clases = agrupados.crearTabla(numeros)
     headers = ["Clase", "Punto Medio (xi)", "Frecuencia", "Frecuencia Relativa", "Frecuencia Acumulada", "Frecuencia Acumulada Relativa"]
     # Formatear tabla usando tabulate
