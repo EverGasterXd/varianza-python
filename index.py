@@ -37,7 +37,7 @@ if len(numeros) <= 29:
             with open('resultados.txt', 'w') as f:
                 f.write(tabulate(no_agrupados, headers=headers, tablefmt="psq1"))
                 f.write(f"""
-                {"Los números ingresados son:", ", ".join(map(str, numeros))}
+                {"Los numeros ingresados son:", ", ".join(map(str, numeros))}
                 rango: {rango}
                 varianza: {noAgrupados.varianza(numeros)}
                 media: {noAgrupados.media(numeros)}
@@ -53,13 +53,14 @@ else:
     tabla = agrupados.CrearTabla(numeros)
     headers = ["frecuencia(xi)", "frecuencia relativa", "frecuencia acumulada", "frecuencia relativa acumulada"]
     tabla_frecuencia = tabla.calcular_tabla()
-
+    varianza = tabla.calcular_varianza()
+    media = tabla.calcular_media()
     print(tabulate(tabla_frecuencia, headers=headers, tablefmt='psq1'))
     print(f"""
     {"Los números ingresados son:", ", ".join(map(str, numeros))}
-    varianza: {agrupados.CrearTabla.calcular_varianza(numeros)}
-    media: {agrupados.CrearTabla.calcular_media(numeros)}
-    mediana: {agrupados.CrearTabla.calcular_mediana(numeros)}
+    varianza: {varianza}
+    media: {media}
+    mediana: aun no lo hago
     """)
         
 input("Presione Enter para cerrar el programa.")
