@@ -1,3 +1,0 @@
-- escoger agrupados o no agrupados
-- infinito hasta el 31 en agrupados y limite en no agrupados
-- 
