@@ -1,6 +1,7 @@
 import math
 import agrupados
 import noAgrupados
+import os
 from tabulate import tabulate
 
 
@@ -47,6 +48,7 @@ if len(numeros) <= 29:
             print("La información se ha guardado en 'resultados.txt'")
         else:
              print("cerrando programa")
+             os.system('cls')
              exit()
              
 else:
@@ -58,9 +60,25 @@ else:
     print(tabulate(tabla_frecuencia, headers=headers, tablefmt='psq1'))
     print(f"""
     {"Los números ingresados son:", ", ".join(map(str, numeros))}
-    varianza: {varianza}
-    media: {media}
+    varianza: {tabla.calcular_varianza()}
+    media: {tabla.calcular_media()}
     mediana: aun no lo hago
     """)
-        
+    guardar = input("¿Quieres guardar esta información en un archivo de texto? (s/n): ")
+    if guardar.lower() == 's':
+        with open('resultados.txt', 'w') as f:
+            f.write(tabulate(tabla_frecuencia, headers=headers, tablefmt='psq1'))
+            f.write(f"""
+            {"Los números ingresados son:", ", ".join(map(str, numeros))}
+            varianza: {tabla.calcular_varianza()}
+            media: {tabla.calcular_media()}
+            mediana: aun no lo hago
+            """)
+        print("La información se ha guardado en 'resultados.txt'")
+    else:
+        print("cerrando programa")
+        os.system('cls')
+        exit()
+
+os.system('cls')
 input("Presione Enter para cerrar el programa.")
