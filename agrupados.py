@@ -1,93 +1,67 @@
-import math
-def crearTabla(x):
-    tabla = {}
-    totalDatos = len(x)
+import pandas as pd
+from tabulate import tabulate
 
+class CrearTabla:
+    def __init__(self, datos):
+        self.datos = datos
+        self.num_datos = len(datos)
+        
+    def calcular_tabla(self, num_clases=None):
+        if num_clases is None:
+            # Calcular el número de clases utilizando la regla de Scott
+            ancho_banda = 3.5 * self.std() / (self.num_datos ** (1/3))
+            num_clases = int((max(self.datos) - min(self.datos)) / ancho_banda)
+        
+        # Calcular los límites de clase
+        límites_clase = self.calcular_límites_clase(num_clases)
+        
+        # Calcular las frecuencias
+        frecuencias = self.calcular_frecuencias(límites_clase)
+        
+        # Calcular frecuencia relativa
+        frecuencia_relativa = frecuencias / self.num_datos
+        
+        # Calcular frecuencia acumulada
+        frecuencia_acumulada = frecuencias.cumsum()
+        
+        # Calcular frecuencia relativa acumulada
+        frecuencia_relativa_acumulada = frecuencia_relativa.cumsum()
+        
+        # Calcular el punto medio de cada clase
+        puntos_medios = self.calcular_puntos_medios(límites_clase)
+        
+        # Crear DataFrame para la tabla de frecuencia
+        tabla = pd.DataFrame({
+            'Límite inferior': límites_clase[:-1],
+            'Límite superior': límites_clase[1:],
+            'Punto medio': puntos_medios,
+            'Frecuencia absoluta': frecuencias,
+            'Frecuencia relativa': frecuencia_relativa,
+            'Frecuencia acumulada': frecuencia_acumulada,
+            'Frecuencia relativa acumulada': frecuencia_relativa_acumulada
+        })
+        
+        return tabla
+    
+    def std(self):
+        mean = sum(self.datos) / self.num_datos
+        variance = sum((x - mean) ** 2 for x in self.datos) / self.num_datos
+        return variance ** 0.5
+    
+    def calcular_límites_clase(self, num_clases):
+        min_dato = min(self.datos)
+        max_dato = max(self.datos)
+        ancho_clase = (max_dato - min_dato) / num_clases
+        return [min_dato + i * ancho_clase for i in range(num_clases + 1)]
 
-    minimo = min(x)
-    maximo = max(x)
-    rango = maximo - minimo
+    def calcular_frecuencias(self, límites_clase):
+        frecuencias = [0] * (len(límites_clase) - 1)
+        for dato in self.datos:
+            for i, límite in enumerate(límites_clase[:-1]):
+                if dato >= límite and dato < límites_clase[i+1]:
+                    frecuencias[i] += 1
+                    break
+        return frecuencias
 
-    # Calcular el número de clases redondeando según las especificaciones
-
-    clases = math.ceil(1 + 3.322 * math.log(totalDatos, 10))
-
-    limite = clases
-
-    # Calcular el intervalo
-    intervalo = rango / limite
-
-    frecuenciaAcumulada = 0
-    xi = []
-    # Calcular los puntos medios xi
-    limite_inferior = minimo
-    for i in range(limite):
-        limite_superior = round(limite_inferior + intervalo, 1)
-        for dato in x:
-            if limite_inferior <= round(dato, 1) < math.ceil(limite_superior):
-                if dato in tabla:
-                    tabla[dato]["frecuencia"] += 1
-                else:
-                    tabla[dato] = {"frecuencia": 1}
-
-        punto_medio = round(limite_inferior + (intervalo), 1)
-        xi.append(punto_medio)
-        limite_inferior = limite_superior
-
-
-    for info in tabla.values():
-        frecuencia = info["frecuencia"]
-        frecuenciarelativa = frecuencia / totalDatos
-        frecuenciaAcumulada += frecuencia
-        frecuenciaAcumuladarelativa = frecuenciaAcumulada / totalDatos
-
-        info["frecuencia relativa"] = frecuenciarelativa
-        info["frecuencia acumulada"] = frecuenciaAcumulada
-        info["frecuencia acumulada relativa"] = frecuenciaAcumuladarelativa
-
-    return tabla, xi, intervalo, clases
-
-
-def media(datos_agrupados):
-    suma = 0
-    total_frecuencia = 0
-    for xi, info in datos_agrupados.items():
-        suma += xi * info["frecuencia"]
-        total_frecuencia += info["frecuencia"]
-    return suma / total_frecuencia if total_frecuencia != 0 else 0
-
-
-def mediana(datos_agrupados, intervalo):
-    total_frecuencia = sum(info["frecuencia"] for info in datos_agrupados.values())
-    mediana_index = total_frecuencia / 2
-
-    # Buscar la clase de la mediana
-    frecuencia_acumulada = 0
-    for xi, info in datos_agrupados.items():
-        frecuencia_acumulada += info["frecuencia"]
-        if frecuencia_acumulada >= mediana_index:
-            clase_mediana = xi
-            break
-
-    # Calcular la mediana
-    limite_inferior = clase_mediana - intervalo / 2
-    frecuencia_mediana = datos_agrupados[clase_mediana]["frecuencia"]
-    mediana = limite_inferior + ((mediana_index - (frecuencia_acumulada - frecuencia_mediana)) / frecuencia_mediana) * intervalo
-    return mediana
-
-
-def moda(datos_agrupados):
-    moda_frecuencia = max(info["frecuencia"] for info in datos_agrupados.values())
-    modas = [xi for xi, info in datos_agrupados.items() if info["frecuencia"] == moda_frecuencia]
-    return modas
-
-
-def varianza(datos_agrupados):
-    media_val = media(datos_agrupados)
-    total_frecuencia = sum(info["frecuencia"] for info in datos_agrupados.values())
-    suma = sum(((xi - media_val) ** 2) * info["frecuencia"] for xi, info in datos_agrupados.items())
-    return suma / total_frecuencia if total_frecuencia != 0 else 0
-
-
-def d_e(datos_agrupados):
-    return math.sqrt(varianza(datos_agrupados))
+    def calcular_puntos_medios(self, límites_clase):
+        return [(límites_clase[i] + límites_clase[i+1]) / 2 for i in range(len(límites_clase) - 1)]
