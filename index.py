@@ -46,6 +46,10 @@ if len(numeros) <= 29:
                 moda: {noAgrupados.moda(numeros)}
                 """)
             print("La información se ha guardado en 'resultados.txt'")
+
+            ruta = 'resultados.txt'
+            os.startfile(ruta)
+
         else:
              print("cerrando programa")
              os.system('cls')
@@ -72,9 +76,14 @@ else:
             {"Los números ingresados son:", ", ".join(map(str, numeros))}
             varianza: {tabla.calcular_varianza()}
             media: {tabla.calcular_media()}
-            mediana: aun no lo hago
+            mediana: {tabla.calcular_mediana()}
+            desviacion estandar: {tabla.calcular_desviacion_estandar()}
             """)
         print("La información se ha guardado en 'resultados.txt'")
+        
+        ruta = 'resultados.txt'
+        os.startfile(ruta)
+
     else:
         print("cerrando programa")
         os.system('cls')
