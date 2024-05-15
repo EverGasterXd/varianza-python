@@ -2,6 +2,9 @@ import agrupados
 <<<<<<< HEAD
 =======
 import noAgrupados
+<<<<<<< HEAD
+>>>>>>> parent of ac01303 (agrupados)
+=======
 >>>>>>> parent of ac01303 (agrupados)
 from tabulate import tabulate
 import os
