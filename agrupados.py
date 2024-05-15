@@ -8,7 +8,7 @@ class CrearTabla:
         
     def calcular_tabla(self, num_clases=None):
         if num_clases is None:
-            ancho_banda = 3.5 * self.std() / (self.num_datos ** (1/2))
+            ancho_banda = 3.5 * self.std() / (self.num_datos ** (1/3))
             num_clases = int((max(self.datos) - min(self.datos)) / ancho_banda)
         
         límites_clase = self.calcular_límites_clase(num_clases)
@@ -25,7 +25,7 @@ class CrearTabla:
         puntos_medios = self.calcular_puntos_medios(límites_clase)
         
         tabla = pd.DataFrame({
-            'Clases': [f"{límites_clase[i]} - {límites_clase[i+1]}" for i in range(len(límites_clase) - 1)],
+            'Clases': [f"{round(límites_clase[i], 2)} - {round(límites_clase[i+1], 2)}" for i in range(len(límites_clase) - 1)],
             'xi': puntos_medios,
             'Frecuencia absoluta': frecuencias_absolutas,
             'Frecuencia relativa': frecuencia_relativa,
@@ -51,23 +51,23 @@ class CrearTabla:
     def calcular_puntos_medios(self, límites_clase):
         return [(límites_clase[i] + límites_clase[i+1]) / 2 for i in range(len(límites_clase) - 1)]
     
-    def calcular_media(self):
-        suma_xi_fi = sum(self.datos['xi'] * self.datos['Frecuencia absoluta'])
-        suma_fi = sum(self.datos['Frecuencia absoluta'])
+    def calcular_media(self, tabla):
+        suma_xi_fi = sum(tabla['xi'] * tabla['Frecuencia absoluta'])
+        suma_fi = sum(tabla['Frecuencia absoluta'])
         media = suma_xi_fi / suma_fi
         return media
     
-    def calcular_varianza(self):
-        if 'xi' not in self.datos.columns or 'Frecuencia absoluta' not in self.datos.columns:
+    def calcular_varianza(self, tabla):
+        if 'xi' not in tabla.columns or 'Frecuencia absoluta' not in tabla.columns:
             raise ValueError("Las columnas 'xi' y/o 'Frecuencia absoluta' no existen en los datos.")
         
-        if not all(isinstance(x, (int, float)) for x in self.datos['xi']):
+        if not all(isinstance(x, (int, float)) for x in tabla['xi']):
             raise ValueError("La columna 'xi' debe contener solo números.")
         
-        if not all(isinstance(x, (int, float)) for x in self.datos['Frecuencia absoluta']):
+        if not all(isinstance(x, (int, float)) for x in tabla['Frecuencia absoluta']):
             raise ValueError("La columna 'Frecuencia absoluta' debe contener solo números.")
         
-        media = self.calcular_media()
-        suma = sum((xi - media) ** 2 * fi for xi, fi in zip(self.datos['xi'], self.datos['Frecuencia absoluta']))
-        varianza = suma / sum(self.datos['Frecuencia absoluta'])
+        media = self.calcular_media(tabla)
+        suma = sum((xi - media) ** 2 * fi for xi, fi in zip(tabla['xi'], tabla['Frecuencia absoluta']))
+        varianza = suma / sum(tabla['Frecuencia absoluta'])
         return varianza

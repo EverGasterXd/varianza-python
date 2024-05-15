@@ -69,7 +69,7 @@ def main():
                 Números ingresados: {", ".join(map(str, numeros))}
                 Varianza: {tabla.calcular_varianza()}
                 Media: {tabla.calcular_media()}
-                Mediana: {tabla.calcular_mediana()}
+                Mediana: 
                 Moda: {tabla.calcular_moda()}
                 Desviación estándar: {tabla.calcular_desviacion_estandar()}
                 """)
