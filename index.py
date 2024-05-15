@@ -1,4 +1,8 @@
 import agrupados
+<<<<<<< HEAD
+=======
+import noAgrupados
+>>>>>>> parent of ac01303 (agrupados)
 from tabulate import tabulate
 import os
 import noAgrupados  # Asegúrate de tener este módulo disponible
@@ -44,6 +48,7 @@ def main():
             print("La información se ha guardado en 'resultados.txt'")
             os.startfile('resultados.txt')
         else:
+<<<<<<< HEAD
             print("Cerrando programa")
 
     else:
@@ -80,3 +85,23 @@ def main():
 
 if __name__ == "__main__":
     main()
+=======
+             print("cerrando programa")
+             exit()
+             
+else:
+    tabla = agrupados.CrearTabla(numeros)
+    headers = ["frecuencia(xi)", "frecuencia relativa", "frecuencia acumulada", "frecuencia relativa acumulada"]
+    tabla_frecuencia = tabla.calcular_tabla()
+    varianza = tabla.calcular_varianza()
+    media = tabla.calcular_media()
+    print(tabulate(tabla_frecuencia, headers=headers, tablefmt='psq1'))
+    print(f"""
+    {"Los números ingresados son:", ", ".join(map(str, numeros))}
+    varianza: {varianza}
+    media: {media}
+    mediana: aun no lo hago
+    """)
+        
+input("Presione Enter para cerrar el programa.")
+>>>>>>> parent of ac01303 (agrupados)
