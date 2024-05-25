@@ -1,78 +1,95 @@
-import pandas as pd
-import numpy as np
+import math
+from collections import Counter
 
 class CrearTabla:
     def __init__(self, datos):
-        self.datos = pd.DataFrame({'xi': datos})
-        self.num_datos = len(datos)
+        self.datos = datos
+        self.num_datos = len(datos) - 1  # Restamos 1 a la cantidad de datos
 
     def calcular_tabla(self, num_clases=None):
-        if num_clases == None:
-            # Calcular el número de clases utilizando la Regla de Sturges
-            num_clases = int(np.ceil(1 + np.log2(self.num_datos)))
+        if num_clases is None:
+            num_clases = math.ceil(1 + math.log2(self.num_datos))
 
-        # Calcular los límites de clase
-        límites_clase = self.calcular_límites_clase(num_clases)
+        limites_clase = self.calcular_limites_clase(num_clases)
+        frecuencias_absolutas = self.calcular_frecuencias_absolutas(limites_clase)
+        frecuencia_relativa = [round(f / self.num_datos, 2) for f in frecuencias_absolutas]
+        frecuencia_acumulada = [sum(frecuencias_absolutas[:i + 1]) for i in range(len(frecuencias_absolutas))]
+        frecuencia_relativa_acumulada = [round(sum(frecuencia_relativa[:i + 1]), 2) for i in range(len(frecuencia_relativa))]
+        puntos_medios = self.calcular_puntos_medios(limites_clase)
 
-        # Calcular las frecuencias absolutas
-        frecuencias_absolutas = pd.cut(self.datos['xi'], límites_clase, include_lowest=True, right=False).value_counts().sort_index().tolist()
-
-        # Calcular frecuencia relativa
-        frecuencia_relativa = [round(f / self.num_datos, 4) for f in frecuencias_absolutas]
-
-        # Calcular frecuencia acumulada
-        frecuencia_acumulada = pd.Series(frecuencias_absolutas).cumsum().tolist()
-
-        # Calcular frecuencia relativa acumulada
-        frecuencia_relativa_acumulada = pd.Series(frecuencia_relativa).cumsum().tolist()
-
-        # Calcular el punto medio de cada clase
-        puntos_medios = self.calcular_puntos_medios(límites_clase)
-
-        # Crear DataFrame para la tabla de frecuencia
-        tabla = pd.DataFrame({
-            'Clases': [f"{round(límites_clase[i], 2)} - {round(límites_clase[i+1], 2)}" for i in range(len(límites_clase) - 1)],
-            'xi': [round(x, 2) for x in puntos_medios],
-            'Frecuencia absoluta': frecuencias_absolutas,
-            'Frecuencia relativa': frecuencia_relativa,
-            'Frecuencia acumulada': frecuencia_acumulada,
-            'Frecuencia relativa acumulada': frecuencia_relativa_acumulada
-        })
+        tabla = []
+        for i in range(len(limites_clase) - 1):
+            tabla.append([
+                f"{round(limites_clase[i], 2)} - {round(limites_clase[i + 1], 2)}",
+                round(puntos_medios[i], 2),
+                frecuencias_absolutas[i],
+                frecuencia_relativa[i],
+                frecuencia_acumulada[i],
+                frecuencia_relativa_acumulada[i]
+            ])
 
         return tabla
 
     def calcular_media(self):
-        media = round(self.datos['xi'].mean(), 2)
+        media = round(sum(self.datos) / self.num_datos, 2)
         return media
 
     def calcular_mediana(self):
-        mediana = round(self.datos['xi'].median(), 2)
-        return mediana
+        datos_ordenados = sorted(self.datos)
+        mitad = self.num_datos // 2
+        if self.num_datos % 2 == 0:
+            mediana = (datos_ordenados[mitad - 1] + datos_ordenados[mitad]) / 2
+        else:
+            mediana = datos_ordenados[mitad]
+        return round(mediana, 2)
 
     def calcular_moda(self):
-        moda = self.datos['xi'].mode()
-        if len(moda) > 1:
-            return [round(m, 2) for m in moda]
-        else:
-            return round(moda.iloc[0], 2)
+        tabla = self.calcular_tabla()
+        frecuencias = [fila[2] for fila in tabla]
+        max_frecuencia = max(frecuencias)
+        i = frecuencias.index(max_frecuencia)
+
+        # Variables necesarias
+        limiteInferior = float(tabla[i][0].split()[0])
+        frecuenciaModal = frecuencias[i]
+        frecuenciaModalAnterior = frecuencias[i - 1] if i > 0 else 0
+        frecuenciaModalSiguiente = frecuencias[i + 1] if i < len(frecuencias) - 1 else 0
+        A = float(tabla[0][0].split('-')[1]) - float(tabla[0][0].split('-')[0]) 
+
+        # Cálculo de la moda utilizando la fórmula proporcionada
+        moda = limiteInferior + ((frecuenciaModal - frecuenciaModalAnterior) / ((frecuenciaModal - frecuenciaModalAnterior) + (frecuenciaModal - frecuenciaModalSiguiente))) * A
+        return round(moda, 2)
 
     def calcular_varianza(self):
-        varianza = round(self.datos['xi'].var(ddof=0), 2)
-        return varianza
+        media = self.calcular_media()
+        varianza = sum((x - media) ** 2 for x in self.datos) / self.num_datos
+        return round(varianza, 2)
 
     def calcular_desviacion_estandar(self):
-        desviacion_estandar = round(self.datos['xi'].std(ddof=0), 2)
-        return desviacion_estandar
+        varianza = self.calcular_varianza()
+        desviacion_estandar = math.sqrt(varianza)
+        return round(desviacion_estandar, 2)
 
-    def calcular_límites_clase(self, num_clases):
-        min_dato = self.datos['xi'].min()
-        max_dato = self.datos['xi'].max()
+    def calcular_limites_clase(self, num_clases):
+        min_dato = min(self.datos)
+        max_dato = max(self.datos)
         ancho_clase = (max_dato - min_dato) / num_clases
-        límites_clase = [min_dato + i * ancho_clase for i in range(num_clases + 1)]
-        # Aseguramos que el último límite sea exactamente el máximo valor del dato
-        límites_clase[-1] = max_dato
-        return límites_clase
+        limites_clase = [min_dato + i * ancho_clase for i in range(num_clases + 1)]
+        limites_clase[-1] = max_dato  # Aseguramos que el último límite sea exactamente el máximo valor del dato
+        return limites_clase
 
-    def calcular_puntos_medios(self, límites_clase):
-        puntos_medios = [(límites_clase[i] + límites_clase[i + 1]) / 2 for i in range(len(límites_clase) - 1)]
+    def calcular_frecuencias_absolutas(self, limites_clase):
+        frecuencias = [0] * (len(limites_clase) - 1)
+        for dato in self.datos:
+            for i in range(len(limites_clase) - 1):
+                if limites_clase[i] <= dato < limites_clase[i + 1]:
+                    frecuencias[i] += 1
+                    break
+        # Aseguramos que el último dato se incluya en la última clase
+        if self.datos[-1] == limites_clase[-1]:
+            frecuencias[-1] += 1
+        return frecuencias
+
+    def calcular_puntos_medios(self, limites_clase):
+        puntos_medios = [(limites_clase[i] + limites_clase[i + 1]) / 2 for i in range(len(limites_clase) - 1)]
         return puntos_medios
